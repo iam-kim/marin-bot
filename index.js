@@ -1,8 +1,4 @@
-if (process.env.NODE_ENV !== "production") {
-  require("dotenv").config(); // only for local dev
-}
-
-console.log("Token length:", process.env.BOT_TOKEN?.length); // TEMP DEBUG
+require("dotenv").config({ path: "/etc/secrets/bot.env" });
 const {
   Client,
   GatewayIntentBits,
