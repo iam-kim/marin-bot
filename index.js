@@ -215,8 +215,13 @@ For bugs or suggestions, join the support server (link in bio).
       setInterval(updateStatus, 300000); // Update every 5 minutes
     });
     
-    console.log("Token length:", process.env.BOT_TOKEN?.length);
-    await client.login(process.env.BOT_TOKEN);
+    console.log("Attempting Discord login...");
+    client.login(process.env.BOT_TOKEN)
+      .then(() => console.log("Login request sent to Discord"))
+      .catch(err => {
+        console.error("❌ DISCORD LOGIN ERROR:");
+        console.error(err);
+      });
   } catch (err) {
     console.error("Failed to connect or login:", err);
     process.exit(1);
