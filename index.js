@@ -1,4 +1,8 @@
-require("dotenv").config();
+if (process.env.NODE_ENV !== "production") {
+  require("dotenv").config(); // only for local dev
+}
+
+console.log("Token length:", process.env.BOT_TOKEN?.length); // TEMP DEBUG
 const {
   Client,
   GatewayIntentBits,
@@ -214,14 +218,8 @@ For bugs or suggestions, join the support server (link in bio).
       updateStatus(); // Set status immediately
       setInterval(updateStatus, 300000); // Update every 5 minutes
     });
-    
-    console.log("Attempting Discord login...");
-    client.login(process.env.BOT_TOKEN)
-      .then(() => console.log("Login request sent to Discord"))
-      .catch(err => {
-        console.error("❌ DISCORD LOGIN ERROR:");
-        console.error(err);
-      });
+
+    await client.login(process.env.BOT_TOKEN);
   } catch (err) {
     console.error("Failed to connect or login:", err);
     process.exit(1);
