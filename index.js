@@ -214,7 +214,8 @@ For bugs or suggestions, join the support server (link in bio).
       updateStatus(); // Set status immediately
       setInterval(updateStatus, 300000); // Update every 5 minutes
     });
-
+    
+    console.log("Token length:", process.env.BOT_TOKEN?.length);
     await client.login(process.env.BOT_TOKEN);
   } catch (err) {
     console.error("Failed to connect or login:", err);
