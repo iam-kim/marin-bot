@@ -1,4 +1,4 @@
-require('dotenv').config();
+require("dotenv").config();
 const {
   Client,
   GatewayIntentBits,
@@ -6,24 +6,41 @@ const {
   Events,
   PermissionsBitField,
   ActivityType,
-  Options
-} = require('discord.js');
-const mongoose = require('mongoose');
-const fs = require('fs');
-const path = require('path');
-const { initTimerManager } = require('./utils/timerManager');
-const { initializeSettings } = require('./utils/settingsManager');
-const { initializeUserSettings } = require('./utils/userSettingsManager');
-const { sendError } = require('./utils/logger');
+  Options,
+} = require("discord.js");
+const mongoose = require("mongoose");
+const fs = require("fs");
+const path = require("path");
+const { initTimerManager } = require("./utils/timerManager");
+const { initializeSettings } = require("./utils/settingsManager");
+const { initializeUserSettings } = require("./utils/userSettingsManager");
+const { sendError } = require("./utils/logger");
+
+// Simple web server to deploy the bot
+const express = require("express");
+const app = express();
+
+app.get("/", (req, res) => res.send("Bot is alive!"));
+
+app.listen(process.env.PORT || 3000, () =>
+  console.log("Web server running..."),
+);
 
 // Global Error Handling to prevent crashes
-process.on('unhandledRejection', async (reason, promise) => {
-  console.error('[CRITICAL] Unhandled Rejection at:', promise, 'reason:', reason);
-  await sendError(`[CRITICAL] Unhandled Rejection: ${reason?.message || reason}`);
+process.on("unhandledRejection", async (reason, promise) => {
+  console.error(
+    "[CRITICAL] Unhandled Rejection at:",
+    promise,
+    "reason:",
+    reason,
+  );
+  await sendError(
+    `[CRITICAL] Unhandled Rejection: ${reason?.message || reason}`,
+  );
 });
 
-process.on('uncaughtException', async (error) => {
-  console.error('[CRITICAL] Uncaught Exception:', error);
+process.on("uncaughtException", async (error) => {
+  console.error("[CRITICAL] Uncaught Exception:", error);
   await sendError(`[CRITICAL] Uncaught Exception: ${error.message}`);
   // Give some time for the log to be sent before exiting if necessary
   setTimeout(() => process.exit(1), 1000);
@@ -53,15 +70,17 @@ const client = new Client({
     },
     users: {
       interval: 3600,
-      filter: () => user => user.id !== client.user.id, // Don't sweep self
+      filter: () => (user) => user.id !== client.user.id, // Don't sweep self
     },
   },
 });
 
 // Load commands from ./commands folder
 client.commands = new Collection();
-const commandsPath = path.join(__dirname, 'commands');
-const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+const commandsPath = path.join(__dirname, "commands");
+const commandFiles = fs
+  .readdirSync(commandsPath)
+  .filter((file) => file.endsWith(".js"));
 
 for (const file of commandFiles) {
   const command = require(path.join(commandsPath, file));
@@ -74,8 +93,10 @@ for (const file of commandFiles) {
 }
 
 // Load event handlers from ./events folder
-const eventsPath = path.join(__dirname, 'events');
-const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js'));
+const eventsPath = path.join(__dirname, "events");
+const eventFiles = fs
+  .readdirSync(eventsPath)
+  .filter((file) => file.endsWith(".js"));
 
 for (const file of eventFiles) {
   const filePath = path.join(eventsPath, file);
@@ -88,7 +109,10 @@ for (const file of eventFiles) {
 }
 
 // Load event handlers
-const { processMessage, processBossAndCardMessage } = require('./utils/messageProcessor');
+const {
+  processMessage,
+  processBossAndCardMessage,
+} = require("./utils/messageProcessor");
 
 client.on(Events.MessageCreate, async (message) => {
   await processMessage(message);
@@ -97,7 +121,7 @@ client.on(Events.MessageCreate, async (message) => {
 
 client.on(Events.MessageUpdate, async (oldMessage, newMessage) => {
   // We only care about updates to messages from the Luvi bot
-  if (newMessage.author.id !== '1269481871021047891') return;
+  if (newMessage.author.id !== "1269481871021047891") return;
   await processMessage(newMessage, oldMessage);
 });
 
@@ -106,9 +130,12 @@ client.on(Events.GuildCreate, async (guild) => {
   try {
     // Find first text channel where bot can send messages
     const defaultChannel = guild.channels.cache
-      .filter(ch =>
-        ch.type === 0 && // text channel
-        ch.permissionsFor(guild.members.me).has(PermissionsBitField.Flags.SendMessages)
+      .filter(
+        (ch) =>
+          ch.type === 0 && // text channel
+          ch
+            .permissionsFor(guild.members.me)
+            .has(PermissionsBitField.Flags.SendMessages),
       )
       .first();
 
@@ -142,10 +169,16 @@ For bugs or suggestions, join the support server (link in bio).
     await defaultChannel.send(guideMessage);
     console.log(`Sent setup guide message in guild ${guild.name}`);
   } catch (error) {
-    if (error.code === 50001) { // Missing Access
-      console.warn(`[WARN] Could not send welcome message in ${guild.name}. The bot may be missing 'Send Messages' permissions in all accessible text channels.`);
+    if (error.code === 50001) {
+      // Missing Access
+      console.warn(
+        `[WARN] Could not send welcome message in ${guild.name}. The bot may be missing 'Send Messages' permissions in all accessible text channels.`,
+      );
     } else {
-      console.error(`Failed to send setup message in guild ${guild.name}:`, error);
+      console.error(
+        `Failed to send setup message in guild ${guild.name}:`,
+        error,
+      );
     }
   }
 });
@@ -154,9 +187,9 @@ For bugs or suggestions, join the support server (link in bio).
 (async () => {
   try {
     await mongoose.connect(process.env.MONGODB_URI);
-    console.log('Connected to MongoDB');
+    console.log("Connected to MongoDB");
 
-    const Reminder = require('./models/Reminder');
+    const Reminder = require("./models/Reminder");
 
     try {
       await Reminder.syncIndexes();
@@ -165,7 +198,7 @@ For bugs or suggestions, join the support server (link in bio).
       console.error("Failed to sync Reminder indexes:", err);
     }
 
-    client.once(Events.ClientReady, async readyClient => {
+    client.once(Events.ClientReady, async (readyClient) => {
       console.log(`Bot logged in as ${readyClient.user.tag}`);
       await initializeSettings();
       await initializeUserSettings();
@@ -173,7 +206,9 @@ For bugs or suggestions, join the support server (link in bio).
 
       const updateStatus = () => {
         const serverCount = readyClient.guilds.cache.size;
-        readyClient.user.setActivity(`Marin bot in ${serverCount} servers`, { type: ActivityType.Watching });
+        readyClient.user.setActivity(`Marin bot in ${serverCount} servers`, {
+          type: ActivityType.Watching,
+        });
       };
 
       updateStatus(); // Set status immediately
@@ -182,7 +217,7 @@ For bugs or suggestions, join the support server (link in bio).
 
     await client.login(process.env.BOT_TOKEN);
   } catch (err) {
-    console.error('Failed to connect or login:', err);
+    console.error("Failed to connect or login:", err);
     process.exit(1);
   }
 })();
