@@ -7,7 +7,7 @@ module.exports = {
         .setName('stats')
         .setDescription('Displays bot statistics and memory usage.'),
     async execute(interaction) {
-        if (interaction.user.id !== '640517686480338948') {
+        if (interaction.user.id !== '755465456873111685') {
             return interaction.reply({ content: 'You are not authorized to use this command.', ephemeral: true });
         }
 

@@ -28,7 +28,7 @@ module.exports = {
       return interaction.reply({ content: 'This command can only be used in a server.', flags: 1 << 6 });
     }
 
-    const botOwnerId = '640517686480338948';
+    const botOwnerId = '755465456873111685';
     if (
       !interaction.member.permissions.has(PermissionsBitField.Flags.ManageRoles) &&
       interaction.user.id !== botOwnerId

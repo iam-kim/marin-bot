@@ -1,7 +1,7 @@
 const { SlashCommandBuilder, PermissionsBitField } = require('discord.js');
 const BotSettings = require('../models/BotSettings');
 
-const BOT_OWNER_ID = '640517686480338948';
+const BOT_OWNER_ID = '755465456873111685';
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -49,7 +49,7 @@ module.exports = {
           `**Tier 2 Role:** ${t2}`,
           `**Tier 1 Role:** ${t1}`
         ].join('\n'),
-        footer: { text: 'Marin Helper Settings' }
+        footer: { text: 'Marin Kitagawa Settings' }
       };
 
       await interaction.reply({ embeds: [embed], flags: 1 << 6 });
