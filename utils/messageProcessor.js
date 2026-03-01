@@ -365,7 +365,7 @@ async function processBossAndCardMessage(message) {
 
       if (roleToPing) {
         try {
-          const content = `<@&${roleToPing}> **${bossInfo.tier} Boss Spawned!**\nBoss: **${bossInfo.bossName}**`;
+          const content = `<@&${roleToPing}> **${bossInfo.tier} Boss Spawned!**\nBoss: **${bossInfo.bossName}** | Element: **${bossInfo.element}**`;
           await message.channel.send({ content, allowedMentions: { roles: [roleToPing] } });
         } catch (err) {
           if (err.code === 50013 || err.code === 50001) {

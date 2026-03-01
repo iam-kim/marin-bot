@@ -11,17 +11,27 @@ function parseBossEmbed(embed) {
 
   // Extract Tier from any embed field containing <:LU_TierX:...>
   let tier = null;
+  let element = null;
+
   if (embed.fields && embed.fields.length > 0) {
     for (const field of embed.fields) {
+      // Extract Tier
       const tierMatch = field.value.match(/<:LU_Tier(\d+):\d+>/);
       if (tierMatch) {
         tier = `Tier ${tierMatch[1]}`;
+      }
+      // Extract Element
+      if (field.name.toLowerCase().includes('element')) {
+        element = field.value
+          .replace(/<a?:\w+:\d+>/g, '') // remove custom emojis
+          .replace(/[\u{1F300}-\u{1FAFF}]/gu, '') // remove unicode emojis
+          .trim();
         break;
       }
     }
   }
 
-  return (bossName && tier) ? { bossName, tier } : null;
+  return (bossName && tier) ? { bossName, tier, element: element || "Unknown" } : null;
 }
 
 function parseBossComponent(components) {
@@ -31,6 +41,7 @@ function parseBossComponent(components) {
 
   let bossName = null;
   let tier = null;
+  let element = null;
 
   for (const comp of root.components) {
     if (comp.type === 10) {
@@ -43,10 +54,19 @@ function parseBossComponent(components) {
           tier = `Tier ${tierMatch[1]}`;
         }
       }
+      if (comp.content.toLowerCase().includes('element')) {
+        const elementMatch = comp.content.match(/Element\s*\n?(.+)/i);
+        if (elementMatch) {
+          element = elementMatch[1]
+            .replace(/<a?:\w+:\d+>/g, '')
+            .replace(/[\u{1F300}-\u{1FAFF}]/gu, '')
+            .trim();
+        }
+      }
     }
   }
 
-  return (bossName && tier) ? { bossName, tier } : null;
+  return (bossName && tier) ? { bossName, tier, element: element || "Unknown" } : null;
 }
 
 function parseExpeditionEmbed(embed) {
